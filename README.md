@@ -202,3 +202,154 @@ Para ver o SQL que essa migração executaria, usadmos o comando `sqlmigrate` qu
 ```bash
 python manage.py sqlmigrate  <name_app> <migrate_name>
 ```
+
+### Docker
+   Instalação
+   `https://docs.docker.com/engine/install/ubuntu/`
+
+
+Verificar as informações do docker
+```bash
+docker info
+```
+Verificar a versão do docker
+```bash
+docker version
+```
+Lista as imagens que temos baixadas
+```bash
+docker images
+```
+Verificar o status do conteiner
+```bash
+docker ps
+```
+Verfirificar as configurações de um container
+```bash
+docker inspect (id da imagem ou container)
+```
+Inicializar um container
+```bash
+docker start (id do container)
+```
+Parar um container
+```bash
+docker stop (id ou nome container)
+```
+
+### Instalando Postgres com DOCKER
+
+##### Atributo `-d`
+
+Este parâmetro determina que o container em questão será executado como um serviço em background
+##### Porta Externa
+
+Por padrão, o Postgres roda na porta 5432, mas isso fica disponível apenas dentro do container, para permitir que ele acessado pela máquina local, precisamos fazer um mapping da porta interna, para porta externa. 
+
+Fazemos isso com o parametro `-p`, logo após, indicamos uma porta local e para qual porta deve redirecionar
+por exemplo:
+```bash
+ -p 5432:5432
+```
+
+##### Definindo senha e usuario
+
+Para definirmos qual a senha do banco, devemos alterar uma variável de ambiente `-e`
+por exemplo:
+
+Senha
+
+```bash
+-e POSTGRES_PASSWORD=suasenha
+```
+Usuario
+
+```bash
+-e POSTGRES_USER=user
+```
+
+##### Volume
+
+padrão, todos os dados são armazenados internamente dentro do container, e quando paramos ele, perdemos tudo. 
+Para que possamos gravar os dados permanente, utilizaremos os `volumes do docker`, iremos definir uma pasta da máquina que será responsável pelo armazenamento,
+
+Exemplo:
+
+Criei uma pasta com o nome database no diretório `/home/derpy/Documentos/database_postgres`. Feito isto, vamos mapear a pasta de armazenamento dentro do container, para nossa pasta que criamos, para fazer esse mapeamento usamos o `-v`
+
+```bash
+-v /home/derpy/Documentos/database_postgres:/var/lib/postgresql/data
+```
+
+Agora só roda o comando:
+
+```bash
+docker run -d -i -t -p 5432:5432 -v /home/derpy/Documentos/database_postgres:/var/lib/postgresql/data -e POSTGRES_DB=postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres postgres:13-alpine
+```
+
+
+### Conectar ao Postgresql em um contêiner docker local
+
+Com as porta 5432 do seu contêiner para a porta 5432 do seu servidor.`-p <Host_port>:<container_port>`.
+O postgres está acessível a partir do seu `public-server-ip:5432`
+
+Vá para o seu localhost (onde você tem alguma ferramenta ou o cliente psql).
+
+```bash
+psql -h public-ip-server -p 5432 -U postgres
+```
+
+Exemplo
+
+```bash
+➜ psql -h 172.17.0.2 -p 5432 -U postgres
+Password for user postgres: 
+psql (14.1 (Ubuntu 14.1-2.pgdg20.04+1), server 13.4)
+Type "help" for help.
+
+postgres=# \l
+                                 List of databases
+   Name    |  Owner   | Encoding |  Collate   |   Ctype    |   Access privileges   
+-----------+----------+----------+------------+------------+-----------------------
+ postgres  | postgres | UTF8     | en_US.utf8 | en_US.utf8 | 
+ template0 | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+           |          |          |            |            | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+           |          |          |            |            | postgres=CTc/postgres
+(3 rows)
+
+postgres=# 
+```
+
+
+### Backup do banco de dados PostgreSQL
+
+O PostgreSQL vem com `pg_dump`e `pg_dumpall`ferramentas que ajudam a bancos de dados de backup fácil e eficaz.
+
+Para quem deseja ver o comando para fazer backup de bancos de dados compactado rapidamente, aqui está:
+
+- `-h` é o host(docker)
+- `-p` é a porta(docker)
+
+```bash
+pg_dump -h 172.17.0.2 -p 5432 -d postgres -U postgres | gzip > test_db_backup.sql.gz
+
+```
+
+OBS: Caso aconteça o seguinte error:
+
+```bash
+pg_dump: server version: 13.4; pg_dump version: 10.19 (Ubuntu 10.19-0ubuntu0.18.04.1) 
+pg_dump: aborting because of server version mismatch
+```
+
+Você tera que atualizar o postgresql-client para versão pedida, para uso execute os comandos e
+especifique a versão do postgresql-client
+```bash
+➜ sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+➜ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+➜ sudo apt-get update
+➜ sudo apt-get install -y postgresql-client-13
+```
+
+Mais referência: https://computingforgeeks.com/how-to-install-postgresql-13-on-ubuntu/
