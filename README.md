@@ -33,4 +33,7 @@ mais informações [clique aqui](./tecnologias.md)
 
 # Sistema em execução
 
-![clique aqui](./media/1.mp4)
+
+<figure class="video_container">
+  <iframe src="./media/1.mp4" frameborder="0" allowfullscreen="true"> </iframe>
+</figure>
