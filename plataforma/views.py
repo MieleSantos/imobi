@@ -61,3 +61,10 @@ def agendar_visitas(request):
 def agendamentos(request):
     visitas = Visitas.objects.filter(usuario=request.user)
     return render(request, "agendamentos.html", {'visitas': visitas})
+
+
+def cancelar_agendamento(request, id):
+    visitas = get_object_or_404(Visitas, id=id)
+    visitas.status = "C"
+    visitas.save()
+    return redirect('/agendamentos')
