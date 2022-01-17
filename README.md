@@ -34,6 +34,4 @@ mais informações [clique aqui](./tecnologias.md)
 # Sistema em execução
 
 
-<figure class="video_container">
-  <iframe src="./media/1.mp4" frameborder="0" allowfullscreen="true"> </iframe>
-</figure>
+![apresentacao](./media/Peek_17-01-2022_18-55.gif)
